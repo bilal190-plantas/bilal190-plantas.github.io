@@ -261,6 +261,9 @@ let fuel=100;
 let obs=[],met=[];
 let dist=0;
 
+/* CÁMARA */
+let camY = 0;
+
 const gravity=0.03;
 const thrust=0.18;
 const maxSpeed=6;
@@ -273,27 +276,27 @@ ctx.fillRect(0,0,c.width,c.height);
 
 dist++;
 
-/* spawn */
-if(Math.random()<0.06)obs.push({x:Math.random()*c.width,y:-50});
-if(Math.random()<0.08)met.push({x:Math.random()*c.width,y:-50,vy:2+Math.random()*3});
+/* spawn mundo (más arriba = más difícil) */
+if(Math.random()<0.06)
+obs.push({x:Math.random()*c.width,y:r.y-800});
 
-/* CONTROLES FIXADOS */
+if(Math.random()<0.08)
+met.push({x:Math.random()*c.width,y:r.y-1000,vy:2+Math.random()*3});
+
+/* CONTROLES */
 let pushing=false;
 
-/* W = subir */
 if(keys.w && fuel>0){
 r.vy-=thrust;
 fuel-=0.15;
 pushing=true;
 }
 
-/* S = freno real (CORREGIDO) */
 if(keys.s){
-r.vy += 0.12;   // ahora sí frena/baja correctamente
-fuel -= 0.05;
+r.vy+=0.1;
+fuel-=0.05;
 }
 
-/* A/D */
 if(keys.a)r.x-=4;
 if(keys.d)r.x+=4;
 
@@ -306,42 +309,73 @@ if(r.vy<-maxSpeed)r.vy=-maxSpeed;
 
 r.y+=r.vy;
 
-/* cohete */
-ctx.fillStyle="orange";
-ctx.fillRect(r.x,r.y,20,40);
+/* CÁMARA SIGUIENDO AL COHETE */
+camY = r.y - c.height*0.7;
 
-/* obstáculos */
+/* COHETE (centrado en cámara) */
+let drawX = r.x;
+let drawY = r.y - camY;
+
+ctx.fillStyle="orange";
+ctx.fillRect(drawX,drawY,20,40);
+
+/* OBSTÁCULOS */
 ctx.fillStyle="red";
 for(let i=0;i<obs.length;i++){
-obs[i].y+=2.5;
-ctx.fillRect(obs[i].x,obs[i].y,40,40);
+
+let y = obs[i].y - camY;
+
+ctx.fillRect(obs[i].x,y,40,40);
 
 if(
-r.x<obs[i].x+40&&r.x+20>obs[i].x&&
-r.y<obs[i].y+40&&r.y+40>obs[i].y
+r.x < obs[i].x+40 &&
+r.x+20 > obs[i].x &&
+r.y < obs[i].y+40 &&
+r.y+40 > obs[i].y
 ){
 over("💥 Choque");
 return;
-}}
+}
+}
 
-/* meteoritos */
+/* METEORITOS */
 ctx.fillStyle="white";
 for(let i=0;i<met.length;i++){
-met[i].y+=met[i].vy;
+
+met[i].y += met[i].vy;
+
+let y = met[i].y - camY;
+
 ctx.beginPath();
-ctx.arc(met[i].x,met[i].y,6,0,Math.PI*2);
+ctx.arc(met[i].x,y,6,0,Math.PI*2);
 ctx.fill();
 
 if(
-r.x<met[i].x+10&&r.x+20>met[i].x&&
-r.y<met[i].y+10&&r.y+40>met[i].y
+r.x < met[i].x+10 &&
+r.x+20 > met[i].x &&
+r.y < met[i].y+10 &&
+r.y+40 > met[i].y
 ){
 over("☄️ Impacto");
 return;
-}}
+}
+}
 
-/* victoria */
-if(dist>5000){
+/* LUNA (meta arriba del mundo) */
+ctx.fillStyle="white";
+let moonY = -5000 - camY;
+
+ctx.beginPath();
+ctx.arc(c.width/2, moonY, 60, 0, Math.PI*2);
+ctx.fill();
+
+/* HUD */
+ctx.fillStyle="white";
+ctx.fillText("Fuel: "+fuel.toFixed(0),10,20);
+ctx.fillText("Altura: "+(-r.y).toFixed(0),10,40);
+
+/* VICTORIA */
+if(r.y < -5000){
 over("🌙 ¡Llegaste a la Luna!");
 return;
 }
