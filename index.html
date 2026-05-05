@@ -1,3 +1,260 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Arcade Hub</title>
+
+<style>
+body{
+  margin:0;
+  font-family:system-ui;
+  background:#0f172a;
+  color:white;
+  overflow:hidden;
+}
+
+#menu{
+  position:absolute;
+  width:100%;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  background:linear-gradient(135deg,#0f172a,#1e293b);
+}
+
+.btn{
+  width:240px;
+  padding:12px;
+  margin:8px;
+  border:none;
+  border-radius:12px;
+  color:white;
+  font-size:15px;
+}
+
+.g1{background:#22c55e;}
+.g2{background:#3b82f6;}
+.g3{background:#f97316;}
+.g4{background:#a855f7;}
+
+#game{display:none;}
+
+canvas{
+  width:100vw;
+  height:100vh;
+  display:block;
+}
+
+/* GAME OVER */
+#gameover{
+  display:none;
+  position:absolute;
+  top:0;left:0;
+  width:100%;height:100%;
+  background:rgba(0,0,0,0.85);
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+}
+#gameover button{
+  padding:10px 20px;
+  border:none;
+  border-radius:10px;
+  background:#22c55e;
+  color:white;
+}
+
+/* CONTROLES MÓVIL */
+#controls{
+  position:absolute;
+  bottom:20px;
+  width:100%;
+  display:flex;
+  justify-content:center;
+  gap:10px;
+}
+
+.ctrl{
+  width:60px;
+  height:60px;
+  border-radius:50%;
+  background:rgba(255,255,255,0.2);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-size:20px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- MENU -->
+<div id="menu">
+  <h1>🎮 ARCADE HUB</h1>
+  <button class="btn g1" onclick="start(1)">Esquiva Enemigos</button>
+  <button class="btn g2" onclick="start(2)">Monedas</button>
+  <button class="btn g3" onclick="start(3)">Snake</button>
+  <button class="btn g4" onclick="start(4)">🚀 Viaje a la Luna</button>
+</div>
+
+<!-- GAME -->
+<div id="game">
+  <canvas id="c"></canvas>
+
+  <div id="controls">
+    <div class="ctrl" ontouchstart="keys.w=true" ontouchend="keys.w=false">⬆</div>
+    <div class="ctrl" ontouchstart="keys.a=true" ontouchend="keys.a=false">⬅</div>
+    <div class="ctrl" ontouchstart="keys.s=true" ontouchend="keys.s=false">⬇</div>
+    <div class="ctrl" ontouchstart="keys.d=true" ontouchend="keys.d=false">➡</div>
+  </div>
+
+  <div id="gameover">
+    <h1>💀 GAME OVER</h1>
+    <p id="txt"></p>
+    <button onclick="location.reload()">Aceptar</button>
+  </div>
+</div>
+
+<script>
+
+let c=document.getElementById("c");
+let ctx=c.getContext("2d");
+
+function resize(){
+  c.width=innerWidth;
+  c.height=innerHeight;
+}
+window.addEventListener("resize",resize);
+
+let keys={};
+document.addEventListener("keydown",e=>keys[e.key.toLowerCase()]=true);
+document.addEventListener("keyup",e=>keys[e.key.toLowerCase()]=false);
+
+/* GAME OVER */
+function over(t){
+  document.getElementById("gameover").style.display="flex";
+  document.getElementById("txt").innerText=t;
+}
+
+/* MENU */
+function start(g){
+  document.getElementById("menu").style.display="none";
+  document.getElementById("game").style.display="block";
+  resize();
+
+  if(g===1) g1();
+  if(g===2) g2();
+  if(g===3) g3();
+  if(g===4) g4();
+}
+
+/* ================= GAME 1 ================= */
+function g1(){
+let p={x:100,y:100},e=[];
+
+function loop(){
+ctx.fillStyle="#0f172a";
+ctx.fillRect(0,0,c.width,c.height);
+
+if(keys.w)p.y-=5;
+if(keys.s)p.y+=5;
+if(keys.a)p.x-=5;
+if(keys.d)p.x+=5;
+
+ctx.fillStyle="lime";
+ctx.fillRect(p.x,p.y,20,20);
+
+if(Math.random()<0.03)e.push({x:Math.random()*c.width,y:0});
+
+ctx.fillStyle="red";
+for(let i=0;i<e.length;i++){
+e[i].y+=4;
+ctx.fillRect(e[i].x,e[i].y,20,20);
+
+if(Math.abs(e[i].x-p.x)<20&&Math.abs(e[i].y-p.y)<20){
+over("💥 Te eliminaron");
+return;
+}}
+
+requestAnimationFrame(loop);
+}
+loop();
+}
+
+/* ================= GAME 2 ================= */
+function g2(){
+let p={x:100,y:100},coins=[],score=0;
+
+function loop(){
+ctx.fillStyle="#020617";
+ctx.fillRect(0,0,c.width,c.height);
+
+if(keys.w)p.y-=5;
+if(keys.s)p.y+=5;
+if(keys.a)p.x-=5;
+if(keys.d)p.x+=5;
+
+ctx.fillStyle="blue";
+ctx.fillRect(p.x,p.y,20,20);
+
+if(Math.random()<0.05){
+coins.push({x:Math.random()*c.width,y:Math.random()*c.height});
+}
+
+for(let i=0;i<coins.length;i++){
+ctx.fillStyle="yellow";
+ctx.beginPath();
+ctx.arc(coins[i].x,coins[i].y,8,0,Math.PI*2);
+ctx.fill();
+
+if(Math.abs(coins[i].x-p.x)<20&&Math.abs(coins[i].y-p.y)<20){
+coins.splice(i,1);
+score+=10;
+}}
+
+requestAnimationFrame(loop);
+}
+loop();
+}
+
+/* ================= GAME 3 ================= */
+function g3(){
+let s=[{x:100,y:100}],d="r";
+
+document.onkeydown=e=>{
+if(e.key==="ArrowUp")d="u";
+if(e.key==="ArrowDown")d="d";
+if(e.key==="ArrowLeft")d="l";
+if(e.key==="ArrowRight")d="r";
+};
+
+function loop(){
+ctx.fillStyle="#111";
+ctx.fillRect(0,0,c.width,c.height);
+
+let h={...s[0]};
+
+if(d==="r")h.x+=10;
+if(d==="l")h.x-=10;
+if(d==="u")h.y-=10;
+if(d==="d")h.y+=10;
+
+s.unshift(h);
+s.pop();
+
+ctx.fillStyle="lime";
+s.forEach(a=>ctx.fillRect(a.x,a.y,10,10));
+
+requestAnimationFrame(loop);
+}
+loop();
+}
+
+/* ================= GAME 4 (LUNA ARREGLADO) ================= */
 function g4(){
 
 let r={x:200,y:500,vy:0};
@@ -5,11 +262,10 @@ let fuel=100;
 let obs=[],met=[];
 let dist=0;
 
-// límites físicos (IMPORTANTE)
-const gravity = 0.03;
-const thrust = 0.18;
-const maxSpeed = 6;
-const drag = 0.99;
+const gravity=0.03;
+const thrust=0.18;
+const maxSpeed=6;
+const drag=0.99;
 
 function loop(){
 
@@ -18,92 +274,68 @@ ctx.fillRect(0,0,c.width,c.height);
 
 dist++;
 
-/* spawn enemigos */
-if(Math.random()<0.06){
-obs.push({x:Math.random()*c.width,y:-50});
-}
-if(Math.random()<0.08){
-met.push({x:Math.random()*c.width,y:-50,vy:2+Math.random()*3});
-}
+/* spawn */
+if(Math.random()<0.06)obs.push({x:Math.random()*c.width,y:-50});
+if(Math.random()<0.08)met.push({x:Math.random()*c.width,y:-50,vy:2+Math.random()*3});
 
-/* CONTROLES MEJORADOS */
-let pushing = false;
+/* control */
+let pushing=false;
 
-if(keys.w && fuel>0){
-r.vy -= thrust;
-fuel -= 0.15;
-pushing = true;
+if(keys.w&&fuel>0){
+r.vy-=thrust;
+fuel-=0.15;
+pushing=true;
 }
 
-if(keys.a) r.x -= 4;
-if(keys.d) r.x += 4;
+if(keys.a)r.x-=4;
+if(keys.d)r.x+=4;
 
-/* FÍSICA CORREGIDA */
-r.vy += gravity;
+/* física */
+r.vy+=gravity;
+r.vy*=drag;
 
-/* freno natural (clave del bug arreglado) */
-r.vy *= drag;
+if(r.vy>maxSpeed)r.vy=maxSpeed;
+if(r.vy<-maxSpeed)r.vy=-maxSpeed;
 
-/* límite de velocidad */
-if(r.vy > maxSpeed) r.vy = maxSpeed;
-if(r.vy < -maxSpeed) r.vy = -maxSpeed;
+if(!pushing&&Math.abs(r.vy)<0.2)r.vy=0;
 
-/* si no empujas, estabiliza más rápido */
-if(!pushing && Math.abs(r.vy) < 0.2){
-r.vy = 0;
-}
+r.y+=r.vy;
 
-/* movimiento */
-r.y += r.vy;
-
-/* COHETE */
+/* cohete */
 ctx.fillStyle="orange";
 ctx.fillRect(r.x,r.y,20,40);
 
-/* OBSTÁCULOS */
+/* obstáculos */
 ctx.fillStyle="red";
 for(let i=0;i<obs.length;i++){
-obs[i].y += 2.5;
-
+obs[i].y+=2.5;
 ctx.fillRect(obs[i].x,obs[i].y,40,40);
 
 if(
-r.x < obs[i].x+40 &&
-r.x+20 > obs[i].x &&
-r.y < obs[i].y+40 &&
-r.y+40 > obs[i].y
+r.x<obs[i].x+40&&r.x+20>obs[i].x&&
+r.y<obs[i].y+40&&r.y+40>obs[i].y
 ){
-over("💥 Choque con obstáculo");
+over("💥 Choque");
 return;
-}
-}
+}}
 
-/* METEORITOS */
+/* meteoritos */
 ctx.fillStyle="white";
 for(let i=0;i<met.length;i++){
-met[i].y += met[i].vy;
-
+met[i].y+=met[i].vy;
 ctx.beginPath();
 ctx.arc(met[i].x,met[i].y,6,0,Math.PI*2);
 ctx.fill();
 
 if(
-r.x < met[i].x+10 &&
-r.x+20 > met[i].x &&
-r.y < met[i].y+10 &&
-r.y+40 > met[i].y
+r.x<met[i].x+10&&r.x+20>met[i].x&&
+r.y<met[i].y+10&&r.y+40>met[i].y
 ){
-over("☄️ Impacto de meteorito");
+over("☄️ Impacto");
 return;
-}
-}
+}}
 
-/* HUD */
-ctx.fillStyle="white";
-ctx.fillText("Fuel: "+fuel.toFixed(0),10,20);
-ctx.fillText("Distancia: "+dist,10,40);
-
-/* VICTORIA */
+/* victoria */
 if(dist>5000){
 over("🌙 ¡Llegaste a la Luna!");
 return;
@@ -114,3 +346,7 @@ requestAnimationFrame(loop);
 
 loop();
 }
+
+</script>
+</body>
+</html>
