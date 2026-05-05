@@ -1,90 +1,140 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Control Panel</title>
+<meta charset="UTF-8">
+<title>Control Dashboard</title>
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #0f172a, #1e293b);
-      color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
+<style>
+body {
+  margin: 0;
+  font-family: system-ui, Arial;
+  background: radial-gradient(circle at top, #0f172a, #020617);
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
 
-    .panel {
-      background: rgba(255,255,255,0.05);
-      padding: 30px;
-      border-radius: 15px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.5);
-      text-align: center;
-      width: 300px;
-    }
+/* Contenedor principal */
+.dashboard {
+  width: 340px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+  backdrop-filter: blur(10px);
+}
 
-    h1 {
-      margin-bottom: 20px;
-      font-size: 22px;
-    }
+/* Título */
+h1 {
+  font-size: 18px;
+  margin: 0 0 10px 0;
+  text-align: center;
+  opacity: 0.9;
+}
 
-    button {
-      width: 100%;
-      padding: 12px;
-      margin: 10px 0;
-      border: none;
-      border-radius: 10px;
-      font-size: 16px;
-      cursor: pointer;
-      transition: 0.2s;
-    }
+/* Reloj */
+#clock {
+  text-align: center;
+  font-size: 14px;
+  opacity: 0.7;
+  margin-bottom: 15px;
+}
 
-    .on {
-      background: #22c55e;
-      color: white;
-    }
+/* Botones */
+button {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: 0.2s;
+}
 
-    .off {
-      background: #ef4444;
-      color: white;
-    }
+button:hover {
+  transform: scale(1.05);
+}
 
-    .status {
-      margin-top: 15px;
-      font-size: 14px;
-      opacity: 0.8;
-    }
+.on {
+  background: linear-gradient(90deg, #22c55e, #16a34a);
+  color: white;
+}
 
-    button:hover {
-      transform: scale(1.05);
-    }
-  </style>
+.off {
+  background: linear-gradient(90deg, #ef4444, #b91c1c);
+  color: white;
+}
+
+/* Estado */
+.status {
+  text-align: center;
+  margin-top: 10px;
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+/* Tarjeta extra */
+.card {
+  margin-top: 15px;
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.06);
+  text-align: center;
+  font-size: 13px;
+}
+</style>
 </head>
 
 <body>
 
-  <div class="panel">
-    <h1>⚡ Control Panel</h1>
+<div class="dashboard">
+  <h1>⚡ Control Panel</h1>
+  <div id="clock">--:--:--</div>
 
-    <button class="on" onclick="encender()">Encender</button>
-    <button class="off" onclick="apagar()">Apagar</button>
+  <button class="on" onclick="encender()">ENCENDER</button>
+  <button class="off" onclick="apagar()">APAGAR</button>
 
-    <div class="status" id="estado">Estado: desconocido</div>
+  <div class="status" id="estado">Estado: desconocido</div>
+
+  <div class="card">
+    💾 Estado guardado en el navegador
   </div>
+</div>
 
-  <script>
-    function encender() {
-      document.getElementById("estado").innerText = "Estado: ENCENDIDO";
-      console.log("Encender");
-    }
+<script>
 
-    function apagar() {
-      document.getElementById("estado").innerText = "Estado: APAGADO";
-      console.log("Apagar");
-    }
-  </script>
+// Reloj en vivo
+function actualizarReloj() {
+  const now = new Date();
+  document.getElementById("clock").innerText =
+    now.toLocaleTimeString();
+}
+setInterval(actualizarReloj, 1000);
+actualizarReloj();
+
+// Estado inicial guardado
+let estado = localStorage.getItem("estado") || "desconocido";
+document.getElementById("estado").innerText = "Estado: " + estado;
+
+// Encender
+function encender() {
+  estado = "ENCENDIDO";
+  document.getElementById("estado").innerText = "Estado: " + estado;
+  localStorage.setItem("estado", estado);
+}
+
+// Apagar
+function apagar() {
+  estado = "APAGADO";
+  document.getElementById("estado").innerText = "Estado: " + estado;
+  localStorage.setItem("estado", estado);
+}
+
+</script>
 
 </body>
 </html>
