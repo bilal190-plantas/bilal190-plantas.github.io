@@ -2,136 +2,197 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Control Dashboard</title>
+<title>Game Hub 3D</title>
 
 <style>
 body {
   margin: 0;
-  font-family: system-ui, Arial;
+  font-family: system-ui;
   background: radial-gradient(circle at top, #0f172a, #020617);
   color: white;
+  overflow: hidden;
+}
+
+/* MENU PRINCIPAL */
+.menu {
+  position: absolute;
+  width: 100%;
+  height: 100%;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  background: linear-gradient(120deg, #0f172a, #1e293b);
 }
 
-/* Contenedor principal */
-.dashboard {
-  width: 340px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 20px;
-  padding: 20px;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.6);
-  backdrop-filter: blur(10px);
-}
-
-/* Título */
 h1 {
-  font-size: 18px;
-  margin: 0 0 10px 0;
-  text-align: center;
-  opacity: 0.9;
+  font-size: 26px;
+  margin-bottom: 20px;
 }
 
-/* Reloj */
-#clock {
-  text-align: center;
-  font-size: 14px;
-  opacity: 0.7;
-  margin-bottom: 15px;
-}
-
-/* Botones */
-button {
-  width: 100%;
+.btn {
+  width: 220px;
   padding: 12px;
-  margin: 8px 0;
+  margin: 8px;
   border: none;
   border-radius: 12px;
-  font-size: 15px;
   cursor: pointer;
+  font-size: 15px;
   transition: 0.2s;
+  color: white;
 }
 
-button:hover {
+.btn:hover {
   transform: scale(1.05);
 }
 
-.on {
-  background: linear-gradient(90deg, #22c55e, #16a34a);
+.g1 { background: linear-gradient(90deg,#22c55e,#16a34a); }
+.g2 { background: linear-gradient(90deg,#3b82f6,#1d4ed8); }
+.g3 { background: linear-gradient(90deg,#f97316,#ef4444); }
+
+/* JUEGO */
+.game {
+  display: none;
+  width: 100%;
+  height: 100%;
+}
+
+canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.back {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.2);
   color: white;
-}
-
-.off {
-  background: linear-gradient(90deg, #ef4444, #b91c1c);
-  color: white;
-}
-
-/* Estado */
-.status {
-  text-align: center;
-  margin-top: 10px;
-  font-size: 14px;
-  opacity: 0.8;
-}
-
-/* Tarjeta extra */
-.card {
-  margin-top: 15px;
-  padding: 12px;
-  border-radius: 12px;
-  background: rgba(255,255,255,0.06);
-  text-align: center;
-  font-size: 13px;
+  cursor: pointer;
 }
 </style>
 </head>
 
 <body>
 
-<div class="dashboard">
-  <h1>⚡ Control Panel</h1>
-  <div id="clock">--:--:--</div>
+<!-- MENU -->
+<div class="menu" id="menu">
+  <h1>🎮 GAME HUB 3D</h1>
+  <button class="btn g1" onclick="startGame(1)">Juego 1 - Neon Runner</button>
+  <button class="btn g2" onclick="startGame(2)">Juego 2 - Cube Jump</button>
+  <button class="btn g3" onclick="startGame(3)">Juego 3 - Space Orbit</button>
+</div>
 
-  <button class="on" onclick="encender()">ENCENDER</button>
-  <button class="off" onclick="apagar()">APAGAR</button>
-
-  <div class="status" id="estado">Estado: desconocido</div>
-
-  <div class="card">
-    💾 Estado guardado en el navegador
-  </div>
+<!-- JUEGO -->
+<div class="game" id="game">
+  <button class="back" onclick="backMenu()">← Menu</button>
+  <canvas id="canvas"></canvas>
 </div>
 
 <script>
 
-// Reloj en vivo
-function actualizarReloj() {
-  const now = new Date();
-  document.getElementById("clock").innerText =
-    now.toLocaleTimeString();
+let canvas = document.getElementById("canvas");
+let ctx = canvas.getContext("2d");
+
+function resize(){
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
 }
-setInterval(actualizarReloj, 1000);
-actualizarReloj();
+window.addEventListener("resize", resize);
 
-// Estado inicial guardado
-let estado = localStorage.getItem("estado") || "desconocido";
-document.getElementById("estado").innerText = "Estado: " + estado;
-
-// Encender
-function encender() {
-  estado = "ENCENDIDO";
-  document.getElementById("estado").innerText = "Estado: " + estado;
-  localStorage.setItem("estado", estado);
+/* MENU */
+function startGame(n){
+  document.getElementById("menu").style.display = "none";
+  document.getElementById("game").style.display = "block";
+  resize();
+  if(n===1) game1();
+  if(n===2) game2();
+  if(n===3) game3();
 }
 
-// Apagar
-function apagar() {
-  estado = "APAGADO";
-  document.getElementById("estado").innerText = "Estado: " + estado;
-  localStorage.setItem("estado", estado);
+function backMenu(){
+  document.getElementById("menu").style.display = "flex";
+  document.getElementById("game").style.display = "none";
+}
+
+/* ===== JUEGO 1: NEON RUNNER ===== */
+function game1(){
+  let x = 100;
+
+  function loop(){
+    ctx.fillStyle = "#0f172a";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+
+    x += 5;
+    if(x > canvas.width) x = 0;
+
+    ctx.fillStyle = "#22c55e";
+    ctx.fillRect(x, canvas.height/2, 60, 60);
+
+    requestAnimationFrame(loop);
+  }
+  loop();
+}
+
+/* ===== JUEGO 2: CUBE JUMP ===== */
+function game2(){
+  let y = 200;
+  let vel = 0;
+
+  document.onkeydown = (e)=>{
+    if(e.key===" "){
+      vel = -10;
+    }
+  };
+
+  function loop(){
+    ctx.fillStyle = "#020617";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+
+    vel += 0.5;
+    y += vel;
+
+    if(y > canvas.height - 100){
+      y = canvas.height - 100;
+      vel = 0;
+    }
+
+    ctx.fillStyle = "#3b82f6";
+    ctx.fillRect(200, y, 50, 50);
+
+    requestAnimationFrame(loop);
+  }
+  loop();
+}
+
+/* ===== JUEGO 3: SPACE ORBIT ===== */
+function game3(){
+  let angle = 0;
+
+  function loop(){
+    ctx.fillStyle = "#000";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+
+    let cx = canvas.width/2;
+    let cy = canvas.height/2;
+
+    let x = cx + Math.cos(angle)*150;
+    let y = cy + Math.sin(angle)*150;
+
+    angle += 0.02;
+
+    ctx.fillStyle = "#f97316";
+    ctx.beginPath();
+    ctx.arc(x,y,30,0,Math.PI*2);
+    ctx.fill();
+
+    requestAnimationFrame(loop);
+  }
+  loop();
 }
 
 </script>
