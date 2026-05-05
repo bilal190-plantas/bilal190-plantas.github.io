@@ -2,64 +2,92 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Arcade Hub</title>
 
 <style>
-body {
-  margin: 0;
-  font-family: system-ui;
-  background: #0f172a;
-  color: white;
-  overflow: hidden;
+body{
+  margin:0;
+  font-family:system-ui;
+  background:#0f172a;
+  color:white;
+  overflow:hidden;
 }
 
-#menu {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg,#0f172a,#1e293b);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+/* MENU */
+#menu{
+  position:absolute;
+  width:100%;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  background:linear-gradient(135deg,#0f172a,#1e293b);
 }
 
-h1 { margin-bottom: 20px; }
-
-.btn {
-  width: 240px;
-  padding: 12px;
-  margin: 8px;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  color: white;
-  font-size: 15px;
+.btn{
+  width:240px;
+  padding:12px;
+  margin:8px;
+  border:none;
+  border-radius:12px;
+  color:white;
+  font-size:15px;
 }
 
-.g1 { background:#22c55e; }
-.g2 { background:#3b82f6; }
-.g3 { background:#f97316; }
-.g4 { background:#a855f7; }
+.g1{background:#22c55e;}
+.g2{background:#3b82f6;}
+.g3{background:#f97316;}
+.g4{background:#a855f7;}
 
-#game { display:none; }
+#game{display:none;}
 
-canvas {
+canvas{
   width:100vw;
   height:100vh;
   display:block;
 }
 
-#back {
+/* GAME OVER */
+#gameover{
+  display:none;
   position:absolute;
-  top:10px;
-  left:10px;
-  padding:8px 12px;
+  top:0;left:0;
+  width:100%;height:100%;
+  background:rgba(0,0,0,0.85);
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+  text-align:center;
+}
+#gameover button{
+  padding:10px 20px;
   border:none;
-  border-radius:8px;
-  background:rgba(255,255,255,0.2);
+  border-radius:10px;
+  background:#22c55e;
   color:white;
-  cursor:pointer;
+}
+
+/* CONTROLES MOVIL */
+#controls{
+  position:absolute;
+  bottom:20px;
+  width:100%;
+  display:flex;
+  justify-content:center;
+  gap:10px;
+}
+
+.ctrl{
+  width:60px;
+  height:60px;
+  border-radius:50%;
+  background:rgba(255,255,255,0.2);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-size:20px;
 }
 </style>
 </head>
@@ -69,33 +97,51 @@ canvas {
 <!-- MENU -->
 <div id="menu">
   <h1>🎮 ARCADE HUB</h1>
-  <button class="btn g1" onclick="start(1)">🟢 Esquiva Enemigos (WASD)</button>
-  <button class="btn g2" onclick="start(2)">🔵 Atrapa Monedas</button>
-  <button class="btn g3" onclick="start(3)">🟠 Snake Simple</button>
-  <button class="btn g4" onclick="start(4)">🚀 Viaje a la Luna</button>
+  <button class="btn g1" onclick="start(1)">Esquiva Enemigos</button>
+  <button class="btn g2" onclick="start(2)">Monedas</button>
+  <button class="btn g3" onclick="start(3)">Snake</button>
+  <button class="btn g4" onclick="start(4)">🚀 Luna (3 min)</button>
 </div>
 
 <!-- GAME -->
 <div id="game">
-  <button id="back" onclick="location.reload()">← Menú</button>
   <canvas id="c"></canvas>
+
+  <!-- controles móvil -->
+  <div id="controls">
+    <div class="ctrl" ontouchstart="keys.w=true" ontouchend="keys.w=false">⬆</div>
+    <div class="ctrl" ontouchstart="keys.a=true" ontouchend="keys.a=false">⬅</div>
+    <div class="ctrl" ontouchstart="keys.s=true" ontouchend="keys.s=false">⬇</div>
+    <div class="ctrl" ontouchstart="keys.d=true" ontouchend="keys.d=false">➡</div>
+  </div>
+
+  <div id="gameover">
+    <h1>💀 GAME OVER</h1>
+    <p id="txt"></p>
+    <button onclick="location.reload()">Aceptar</button>
+  </div>
 </div>
 
 <script>
 
-let c = document.getElementById("c");
-let ctx = c.getContext("2d");
+let c=document.getElementById("c");
+let ctx=c.getContext("2d");
 
 function resize(){
-  c.width = innerWidth;
-  c.height = innerHeight;
+  c.width=innerWidth;
+  c.height=innerHeight;
 }
-window.addEventListener("resize", resize);
+window.addEventListener("resize",resize);
 
-/* CONTROLES WASD */
-let keys = {};
-document.addEventListener("keydown", e => keys[e.key.toLowerCase()] = true);
-document.addEventListener("keyup", e => keys[e.key.toLowerCase()] = false);
+let keys={};
+document.addEventListener("keydown",e=>keys[e.key.toLowerCase()]=true);
+document.addEventListener("keyup",e=>keys[e.key.toLowerCase()]=false);
+
+/* GAME OVER */
+function over(t){
+  document.getElementById("gameover").style.display="flex";
+  document.getElementById("txt").innerText=t;
+}
 
 /* MENU */
 function start(g){
@@ -103,269 +149,165 @@ function start(g){
   document.getElementById("game").style.display="block";
   resize();
 
-  if(g===1) game1();
-  if(g===2) game2();
-  if(g===3) game3();
-  if(g===4) game4();
+  if(g===1) g1();
+  if(g===2) g2();
+  if(g===3) g3();
+  if(g===4) g4();
 }
 
-/* =====================
-   JUEGO 1: ENEMIGOS WASD
-===================== */
-function game1(){
+/* ================= GAME 1 ================= */
+function g1(){
+let p={x:100,y:100},e=[];
 
-  let p = {x:200,y:200};
-  let enemies = [];
+function loop(){
+ctx.fillStyle="#0f172a";ctx.fillRect(0,0,c.width,c.height);
 
-  function loop(){
-    ctx.fillStyle="#0f172a";
-    ctx.fillRect(0,0,c.width,c.height);
+if(keys.w)p.y-=5;
+if(keys.s)p.y+=5;
+if(keys.a)p.x-=5;
+if(keys.d)p.x+=5;
 
-    // movimiento WASD
-    if(keys["w"]) p.y-=5;
-    if(keys["s"]) p.y+=5;
-    if(keys["a"]) p.x-=5;
-    if(keys["d"]) p.x+=5;
+ctx.fillStyle="green";
+ctx.fillRect(p.x,p.y,20,20);
 
-    // jugador
-    ctx.fillStyle="#22c55e";
-    ctx.fillRect(p.x,p.y,20,20);
+if(Math.random()<0.03)e.push({x:Math.random()*c.width,y:0});
 
-    // enemigos
-    if(Math.random()<0.03){
-      enemies.push({x:Math.random()*c.width,y:0});
-    }
+ctx.fillStyle="red";
+for(let i=0;i<e.length;i++){
+e[i].y+=4;
+ctx.fillRect(e[i].x,e[i].y,20,20);
 
-    ctx.fillStyle="red";
-    for(let i=0;i<enemies.length;i++){
-      enemies[i].y += 4;
-      ctx.fillRect(enemies[i].x,enemies[i].y,20,20);
-
-      // colisión
-      if(Math.abs(enemies[i].x-p.x)<20 &&
-         Math.abs(enemies[i].y-p.y)<20){
-        alert("💥 GAME OVER");
-        location.reload();
-      }
-    }
-
-    requestAnimationFrame(loop);
-  }
-  loop();
+if(Math.abs(e[i].x-p.x)<20&&Math.abs(e[i].y-p.y)<20){
+over("Te eliminaron");
+return;
+}}
+requestAnimationFrame(loop);
+}
+loop();
 }
 
-/* =====================
-   JUEGO 2: MONEDAS
-===================== */
-function game2(){
+/* ================= GAME 2 ================= */
+function g2(){
+let p={x:100,y:100},cns=[],score=0;
 
-  let p = {x:200,y:200};
-  let coins = [];
-  let score = 0;
+function loop(){
+ctx.fillStyle="#020617";ctx.fillRect(0,0,c.width,c.height);
 
-  function loop(){
-    ctx.fillStyle="#020617";
-    ctx.fillRect(0,0,c.width,c.height);
+if(keys.w)p.y-=5;
+if(keys.s)p.y+=5;
+if(keys.a)p.x-=5;
+if(keys.d)p.x+=5;
 
-    if(keys["w"]) p.y-=5;
-    if(keys["s"]) p.y+=5;
-    if(keys["a"]) p.x-=5;
-    if(keys["d"]) p.x+=5;
+ctx.fillStyle="blue";
+ctx.fillRect(p.x,p.y,20,20);
 
-    ctx.fillStyle="#3b82f6";
-    ctx.fillRect(p.x,p.y,20,20);
+if(Math.random()<0.05)cns.push({x:Math.random()*c.width,y:Math.random()*c.height});
 
-    if(Math.random()<0.05){
-      coins.push({x:Math.random()*c.width,y:Math.random()*c.height});
-    }
+for(let i=0;i<cns.length;i++){
+ctx.fillStyle="yellow";
+ctx.beginPath();
+ctx.arc(cns[i].x,cns[i].y,8,0,Math.PI*2);
+ctx.fill();
 
-    for(let i=0;i<coins.length;i++){
-      ctx.fillStyle="yellow";
-      ctx.beginPath();
-      ctx.arc(coins[i].x,coins[i].y,8,0,Math.PI*2);
-      ctx.fill();
+if(Math.abs(cns[i].x-p.x)<20&&Math.abs(cns[i].y-p.y)<20){
+cns.splice(i,1);score+=10;
+}}
 
-      if(Math.abs(coins[i].x-p.x)<20 &&
-         Math.abs(coins[i].y-p.y)<20){
-        coins.splice(i,1);
-        score+=10;
-      }
-    }
-
-    ctx.fillStyle="white";
-    ctx.fillText("Score: "+score,10,20);
-
-    requestAnimationFrame(loop);
-  }
-  loop();
+requestAnimationFrame(loop);
+}
+loop();
 }
 
-/* =====================
-   JUEGO 3: SNAKE
-===================== */
-function game3(){
+/* ================= GAME 3 ================= */
+function g3(){
+let s=[{x:100,y:100}],d="r";
 
-  let snake=[{x:100,y:100}];
-  let dir="right";
+document.onkeydown=e=>{
+if(e.key==="ArrowUp")d="u";
+if(e.key==="ArrowDown")d="d";
+if(e.key==="ArrowLeft")d="l";
+if(e.key==="ArrowRight")d="r";
+};
 
-  document.onkeydown = e=>{
-    if(e.key==="ArrowUp") dir="up";
-    if(e.key==="ArrowDown") dir="down";
-    if(e.key==="ArrowLeft") dir="left";
-    if(e.key==="ArrowRight") dir="right";
-  };
+function loop(){
+ctx.fillStyle="#111";ctx.fillRect(0,0,c.width,c.height);
 
-  function loop(){
-    ctx.fillStyle="#111";
-    ctx.fillRect(0,0,c.width,c.height);
+let h={...s[0]};
+if(d==="r")h.x+=10;
+if(d==="l")h.x-=10;
+if(d==="u")h.y-=10;
+if(d==="d")h.y+=10;
 
-    let h={...snake[0]};
+s.unshift(h);s.pop();
 
-    if(dir==="right")h.x+=10;
-    if(dir==="left")h.x-=10;
-    if(dir==="up")h.y-=10;
-    if(dir==="down")h.y+=10;
+ctx.fillStyle="lime";
+s.forEach(a=>ctx.fillRect(a.x,a.y,10,10));
 
-    snake.unshift(h);
-    snake.pop();
-
-    ctx.fillStyle="#22c55e";
-    snake.forEach(s=>{
-      ctx.fillRect(s.x,s.y,10,10);
-    });
-
-    requestAnimationFrame(loop);
-  }
-  loop();
+requestAnimationFrame(loop);
+}
+loop();
 }
 
-/* =====================
-   JUEGO 4: COHETE A LA LUNA
-===================== */
-function game4(){
+/* ================= GAME 4 (LUNA PRO) ================= */
+function g4(){
 
-  let rocket = {x:200,y:500,vy:0};
-  let fuel = 100;
+let r={x:200,y:500,vy:0};
+let fuel=100;
+let obs=[],met=[];
+let dist=0;
 
-  let obstacles = [];
-  let meteors = [];
-  let distance = 0;
-  let speed = 1;
+function loop(){
+ctx.fillStyle="#000";ctx.fillRect(0,0,c.width,c.height);
 
-  let moonY = -5000; // muy arriba → viaje largo
+dist++;
 
-  function spawn(){
-    if(Math.random()<0.08){
-      obstacles.push({
-        x:Math.random()*c.width,
-        y:-50,
-        w:40,
-        h:40
-      });
-    }
+if(Math.random()<0.07)obs.push({x:Math.random()*c.width,y:-50});
+if(Math.random()<0.1)met.push({x:Math.random()*c.width,y:-50,vy:3});
 
-    if(Math.random()<0.1){
-      meteors.push({
-        x:Math.random()*c.width,
-        y:-50,
-        vy:3+Math.random()*3
-      });
-    }
-  }
+if(keys.w&&fuel>0){r.vy-=0.3;fuel-=0.2;}
+if(keys.a)r.x-=5;
+if(keys.d)r.x+=5;
 
-  function loop(){
+r.vy+=0.05;r.y+=r.vy;
 
-    ctx.fillStyle="#000";
-    ctx.fillRect(0,0,c.width,c.height);
+ctx.fillStyle="orange";
+ctx.fillRect(r.x,r.y,20,40);
 
-    spawn();
+/* obstaculos */
+ctx.fillStyle="red";
+for(let i=0;i<obs.length;i++){
+obs[i].y+=3;
+ctx.fillRect(obs[i].x,obs[i].y,40,40);
 
-    // movimiento WASD
-    if(keys["w"] && fuel>0){
-      rocket.vy -= 0.3;
-      fuel -= 0.2;
-    }
-    if(keys["a"]) rocket.x -= 5;
-    if(keys["d"]) rocket.x += 5;
+if(Math.abs(obs[i].x-r.x)<30&&Math.abs(obs[i].y-r.y)<40){
+over("💥 Choque");
+return;
+}}
 
-    rocket.vy += 0.05;
-    rocket.y += rocket.vy;
+/* meteoritos */
+ctx.fillStyle="white";
+for(let i=0;i<met.length;i++){
+met[i].y+=met[i].vy;
+ctx.beginPath();
+ctx.arc(met[i].x,met[i].y,6,0,Math.PI*2);
+ctx.fill();
 
-    // scroll del mundo (simula subida)
-    distance += speed;
+if(Math.abs(met[i].x-r.x)<20&&Math.abs(met[i].y-r.y)<40){
+over("☄️ Impacto");
+return;
+}}
 
-    // ROCKET
-    ctx.fillStyle="orange";
-    ctx.fillRect(rocket.x,rocket.y,20,40);
+/* victoria */
+if(dist>5000){
+over("🌙 Llegaste a la Luna");
+return;
+}
 
-    // OBSTÁCULOS
-    ctx.fillStyle="red";
-    for(let i=0;i<obstacles.length;i++){
-      obstacles[i].y += speed+2;
-
-      ctx.fillRect(
-        obstacles[i].x,
-        obstacles[i].y,
-        obstacles[i].w,
-        obstacles[i].h
-      );
-
-      // colisión
-      if(
-        rocket.x < obstacles[i].x + 40 &&
-        rocket.x + 20 > obstacles[i].x &&
-        rocket.y < obstacles[i].y + 40 &&
-        rocket.y + 40 > obstacles[i].y
-      ){
-        mostrarGameOver("💥 Chocaste con un obstáculo");
-        return;
-      }
-    }
-
-    // METEORITOS
-    ctx.fillStyle="white";
-    for(let i=0;i<meteors.length;i++){
-      meteors[i].y += meteors[i].vy;
-
-      ctx.beginPath();
-      ctx.arc(meteors[i].x, meteors[i].y, 8, 0, Math.PI*2);
-      ctx.fill();
-
-      if(
-        rocket.x < meteors[i].x + 10 &&
-        rocket.x + 20 > meteors[i].x &&
-        rocket.y < meteors[i].y + 10 &&
-        rocket.y + 40 > meteors[i].y
-      ){
-        mostrarGameOver("☄️ Impacto de meteorito");
-        return;
-      }
-    }
-
-    // LUNA (meta)
-    ctx.fillStyle="white";
-    ctx.beginPath();
-    ctx.arc(c.width/2, moonY + distance, 60, 0, Math.PI*2);
-    ctx.fill();
-
-    // HUD
-    ctx.fillStyle="white";
-    ctx.fillText("Combustible: " + fuel.toFixed(0),10,20);
-    ctx.fillText("Distancia: " + distance.toFixed(0),10,40);
-
-    // victoria tras ~3 min simulados
-    if(distance > 5000){
-      mostrarGameOver("🌙 ¡HAS LLEGADO A LA LUNA!");
-      return;
-    }
-
-    requestAnimationFrame(loop);
-  }
-
-  loop();
+requestAnimationFrame(loop);
+}
+loop();
 }
 
 </script>
-
 </body>
 </html>
